@@ -20,6 +20,6 @@ public class EasyProviderExample {
         // 启动服务提供者
         HttpServer httpServer = new VertxHttpServer();
         LocalRegistry.register(UserService.class.getName(), UserServiceImpl.class);
-        httpServer.doStart(8080);
+        httpServer.doStart(RpcApplication.getRpcConfig().getServerPort());
     }
 }

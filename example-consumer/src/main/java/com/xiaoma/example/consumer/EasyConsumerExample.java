@@ -21,7 +21,7 @@ public class EasyConsumerExample {
         System.out.println(rpc);
         // 启动服务消费者
         UserService userService = ServiceProxyFactory.getProxy(UserService.class);
-        User user = new User();
+        /*User user = new User();
         user.setName("xiaoma");
 
         // 调用
@@ -30,7 +30,8 @@ public class EasyConsumerExample {
             System.out.println(newUser.getName());
         } else {
             System.out.println("user == null");
-        }
-
+        }*/
+        short number = userService.getNumber();
+        System.out.println(number);
     }
 }

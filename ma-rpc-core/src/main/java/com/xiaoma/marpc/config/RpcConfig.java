@@ -1,5 +1,7 @@
 package com.xiaoma.marpc.config;
 
+import lombok.Data;
+
 /**
  * Class Name: RpcConfig
  * Description: RPC 框架配置
@@ -7,7 +9,7 @@ package com.xiaoma.marpc.config;
  * Author: 112033918
  */
 
-
+@Data
 public class RpcConfig {
 
     /**
@@ -29,4 +31,9 @@ public class RpcConfig {
      * 服务器端口号
      */
     private int serverPort = 8080;
+
+    /**
+     * 模拟调用
+     */
+    private boolean mock = false;
 }
