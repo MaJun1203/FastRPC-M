@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.xiaoma</groupId>
-            <artifactId>ma-rpc-easy</artifactId>
+            <artifactId>ma-rpc-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
