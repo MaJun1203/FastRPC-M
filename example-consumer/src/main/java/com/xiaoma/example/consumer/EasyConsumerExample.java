@@ -1,0 +1,31 @@
+package com.xiaoma.example.consumer;
+
+import com.xiaoma.example.common.model.User;
+import com.xiaoma.example.common.service.UserService;
+import com.xiaoma.marpc.proxy.ServiceProxy;
+import com.xiaoma.marpc.proxy.ServiceProxyFactory;
+
+/**
+ * Class Name: EasyConsumerExample
+ * Description:
+ * Created on: 2025/5/8
+ * Author: 112033918
+ */
+
+public class EasyConsumerExample {
+    public static void main(String[] args) {
+        // 启动服务消费者
+        UserService userService = ServiceProxyFactory.getProxy(UserService.class);
+        User user = new User();
+        user.setName("xiaoma");
+
+        // 调用
+        User newUser = userService.getUser(user);
+        if(newUser != null) {
+            System.out.println(newUser.getName());
+        } else {
+            System.out.println("user == null");
+        }
+
+    }
+}
