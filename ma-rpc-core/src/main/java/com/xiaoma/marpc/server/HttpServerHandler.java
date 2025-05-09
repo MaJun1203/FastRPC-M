@@ -1,10 +1,12 @@
 package com.xiaoma.marpc.server;
 
+import com.xiaoma.marpc.RpcApplication;
 import com.xiaoma.marpc.model.RpcRequest;
 import com.xiaoma.marpc.model.RpcResponse;
 import com.xiaoma.marpc.registry.LocalRegistry;
 import com.xiaoma.marpc.serializer.JdkSerializer;
 import com.xiaoma.marpc.serializer.Serializer;
+import com.xiaoma.marpc.serializer.SerializerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
@@ -30,7 +32,7 @@ public class HttpServerHandler implements Handler<HttpServerRequest> {
      */
     public void handle(HttpServerRequest request) {
         // 处理请求的逻辑
-        final Serializer serializer = new JdkSerializer();
+        final Serializer serializer = SerializerFactory.getInstance(RpcApplication.getRpcConfig().getSerializer());
         System.out.println("Received request: " + request.method() + " " + request.uri());
         request.bodyHandler(body -> {
             // 处理请求体

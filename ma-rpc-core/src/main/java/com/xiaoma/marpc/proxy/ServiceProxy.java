@@ -8,6 +8,7 @@ import com.xiaoma.marpc.model.RpcRequest;
 import com.xiaoma.marpc.model.RpcResponse;
 import com.xiaoma.marpc.serializer.JdkSerializer;
 import com.xiaoma.marpc.serializer.Serializer;
+import com.xiaoma.marpc.serializer.SerializerFactory;
 import com.xiaoma.marpc.utils.ConfigUtils;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class ServiceProxy implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RpcConfig config = ConfigUtils.loadConfig(RpcConfig.class, "rpc");
 
-        Serializer serializer = new JdkSerializer();
+        Serializer serializer = SerializerFactory.getInstance(RpcApplication.getRpcConfig().getSerializer());
         // 创建请求对象
         RpcRequest rpcRequest = RpcRequest.builder()
                 .serviceName(method.getDeclaringClass().getName())
