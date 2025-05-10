@@ -1,9 +1,13 @@
 package com.xiaoma.marpc;
 
+import com.xiaoma.marpc.config.RegistryConfig;
 import com.xiaoma.marpc.config.RpcConfig;
 import com.xiaoma.marpc.constant.RpcConstant;
+import com.xiaoma.marpc.registry.Registry;
+import com.xiaoma.marpc.registry.RegistryFactory;
 import com.xiaoma.marpc.utils.ConfigUtils;
 import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * Class Name: RpcApplication
@@ -23,6 +27,10 @@ public class RpcApplication {
     public static void init(RpcConfig newRpcConfig) {
         rpcConfig = newRpcConfig;
         log.info("rpc init, config = {}", newRpcConfig.toString());
+        RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
+        Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
+        registry.init(registryConfig);
+        log.info("rpc registry init, config = {}", registryConfig);
     }
 
     /**

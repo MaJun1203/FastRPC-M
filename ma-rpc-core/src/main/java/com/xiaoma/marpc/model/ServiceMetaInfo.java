@@ -1,5 +1,12 @@
 package com.xiaoma.marpc.model;
 
+import cn.hutool.core.util.StrUtil;
+import com.xiaoma.marpc.serializer.Serializer;
+import lombok.Data;
+import lombok.Setter;
+
+import java.io.Serializable;
+
 /**
  * Class Name: ServiceMetaInfo
  * Description:
@@ -7,7 +14,8 @@ package com.xiaoma.marpc.model;
  * Author: xiaoma
  */
 
-public class ServiceMetaInfo {
+@Data
+public class ServiceMetaInfo implements Serializable {
     /**
      * 服务名称
      */
@@ -51,6 +59,18 @@ public class ServiceMetaInfo {
      */
     public String getServiceNodeKey() {
         return String.format("%s/%s:%s", getServiceKey(), serviceHost, servicePort);
+    }
+
+    /**
+     * 获取完整服务地址
+     *
+     * @return
+     */
+    public String getServiceAddress() {
+        if (!StrUtil.contains(serviceHost, "http")) {
+            return String.format("http://%s:%s", serviceHost, servicePort);
+        }
+        return String.format("%s:%s", serviceHost, servicePort);
     }
 
 }

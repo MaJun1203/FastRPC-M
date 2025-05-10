@@ -4,6 +4,7 @@ import com.xiaoma.marpc.config.RegistryConfig;
 import com.xiaoma.marpc.model.ServiceMetaInfo;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Class Name: Regitstry
@@ -12,7 +13,7 @@ import java.util.List;
  * Author: xiaoma
  */
 
-public interface Regitstry {
+public interface Registry {
     /**
      * 初始化
      *

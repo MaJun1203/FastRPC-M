@@ -1,19 +1,17 @@
 package com.xiaoma.marpc.registry;
 
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson2.JSON;
 import com.xiaoma.marpc.config.RegistryConfig;
 import com.xiaoma.marpc.model.ServiceMetaInfo;
 import io.etcd.jetcd.*;
-import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
  * Author: xiaoma
  */
 
-public class EtcdRegistry implements Regitstry{
+public class EtcdRegistry implements Registry {
     private Client client;
     private KV kvClient;
     /**
@@ -50,11 +48,12 @@ public class EtcdRegistry implements Regitstry{
         Lease leaseClient = client.getLeaseClient();
 
         //创建一个30s的租约
-        long leaseId = leaseClient.grant(30).get().getID();
+        long leaseId = leaseClient.grant(3000).get().getID();
 
         // 设置要存储的键值对
         String registerKey = ETCD_ROOT_PATH + serviceMetaInfo.getServiceNodeKey();
         ByteSequence key = ByteSequence.from(registerKey, StandardCharsets.UTF_8);
+
         ByteSequence value = ByteSequence.from(JSONUtil.toJsonStr(serviceMetaInfo), StandardCharsets.UTF_8);
 
         // 将键值对与租约关联起来，并设置过期时间
@@ -63,8 +62,12 @@ public class EtcdRegistry implements Regitstry{
     }
 
     @Override
-    public void unRegister(ServiceMetaInfo serviceMetaInfo) {
-        kvClient.delete(ByteSequence.from(ETCD_ROOT_PATH + serviceMetaInfo.getServiceNodeKey(), StandardCharsets.UTF_8));
+    public void unRegister(ServiceMetaInfo serviceMetaInfo){
+        try {
+            kvClient.delete(ByteSequence.from(ETCD_ROOT_PATH + serviceMetaInfo.getServiceNodeKey(), StandardCharsets.UTF_8)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -84,6 +87,7 @@ public class EtcdRegistry implements Regitstry{
             return keyValues.stream()
                     .map(keyValue -> {
                         String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
+                        //return JSON.parseObject(value, ServiceMetaInfo.class);
                         return JSONUtil.toBean(value, ServiceMetaInfo.class);
                     })
                     .collect(Collectors.toList());
