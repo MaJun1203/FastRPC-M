@@ -1,5 +1,6 @@
 package com.xiaoma.marpc.model;
 
+import com.xiaoma.marpc.constant.RpcConstant;
 import com.xiaoma.marpc.serializer.Serializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,4 +37,9 @@ public class RpcRequest implements Serializable {
      * 参数列表
      */
     private Object[] parameters;
+
+    /**
+     * 版本号
+     */
+    private String serviceVersion = RpcConstant.DEFAULT_SERVICE_VERSION;
 }
