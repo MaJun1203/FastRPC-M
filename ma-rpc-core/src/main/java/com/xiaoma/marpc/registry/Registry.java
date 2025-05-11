@@ -3,7 +3,9 @@ package com.xiaoma.marpc.registry;
 import com.xiaoma.marpc.config.RegistryConfig;
 import com.xiaoma.marpc.model.ServiceMetaInfo;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -14,6 +16,7 @@ import java.util.concurrent.ExecutionException;
  */
 
 public interface Registry {
+
     /**
      * 初始化
      *
@@ -47,4 +50,16 @@ public interface Registry {
      * 服务销毁
      */
     void destroy();
+
+    /**
+     * 心跳检测
+     */
+    void heartBeat();
+
+    /**
+     * 监听（消费端）
+     *
+     * @param serviceNodeKey
+     */
+    void watch(String serviceNodeKey);
 }
