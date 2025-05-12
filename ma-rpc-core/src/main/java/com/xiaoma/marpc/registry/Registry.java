@@ -61,5 +61,5 @@ public interface Registry {
      *
      * @param serviceNodeKey
      */
-    void watch(String serviceNodeKey);
+    void watch(String serviceKey, String serviceNodeKey);
 }

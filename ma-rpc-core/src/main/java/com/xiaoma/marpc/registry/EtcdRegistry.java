@@ -5,7 +5,6 @@ import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson2.JSON;
 import com.xiaoma.marpc.config.RegistryConfig;
 import com.xiaoma.marpc.model.ServiceMetaInfo;
 import io.etcd.jetcd.*;
@@ -45,7 +44,7 @@ public class EtcdRegistry implements Registry {
 
 
     /**
-     * 注册中心服务缓存
+     * 注册中心服务缓存（支持多个服务键）
      */
     private final RegistryServiceCache registryServiceCache = new RegistryServiceCache();
 
@@ -99,13 +98,15 @@ public class EtcdRegistry implements Registry {
     @Override
     public List<ServiceMetaInfo> serviceDiscovery(String serviceKey) {
         // 优先从缓存获取服务
-        List<ServiceMetaInfo> cachedServiceMetaInfoList = registryServiceCache.readCache();
+        List<ServiceMetaInfo> cachedServiceMetaInfoList = registryServiceCache.readCache(serviceKey);
         if (cachedServiceMetaInfoList != null) {
+            System.out.println("从缓存中获取服务列表"+cachedServiceMetaInfoList);
             return cachedServiceMetaInfoList;
         }
+
+
         // 前缀搜索，结尾一定要加 '/'
         String searchPrefix = ETCD_ROOT_PATH + serviceKey + "/";
-
         try {
             // 前缀查询
             GetOption getOption = GetOption.builder().isPrefix(true).build();
@@ -117,14 +118,19 @@ public class EtcdRegistry implements Registry {
             // 解析服务信息
             List<ServiceMetaInfo> serviceMetaInfoList = keyValues.stream()
                     .map(keyValue -> {
-                        String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
                         //return JSON.parseObject(value, ServiceMetaInfo.class);
-                        watch(value);
+                        String key = keyValue.getKey().toString(StandardCharsets.UTF_8);
+                        ServiceMetaInfo serviceMetaInfo = JSONUtil.toBean(keyValue.getValue().toString(StandardCharsets.UTF_8), ServiceMetaInfo.class);
+                        registryServiceCache.writeCache(serviceKey,key,serviceMetaInfo);
+                        // 监听 key 的变化
+                        watch(serviceKey,key);
+                        String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
                         return JSONUtil.toBean(value, ServiceMetaInfo.class);
                     })
                     .collect(Collectors.toList());
             // 写入缓存
-            registryServiceCache.writeCache(serviceMetaInfoList);
+
+            System.out.println("从注册中心获取服务列表"+serviceMetaInfoList);
             return serviceMetaInfoList;
         } catch (Exception e) {
             throw new RuntimeException("获取服务列表失败", e);
@@ -157,27 +163,24 @@ public class EtcdRegistry implements Registry {
     @Override
     public void heartBeat() {
         // 10 秒续签一次
-        CronUtil.schedule("*/10 * * * * *", new Task() {
-            @Override
-            public void execute() {
-                // 遍历本节点所有的 key
-                for (String key : localRegisterNodeKeySet) {
-                    try {
-                        List<KeyValue> keyValues = kvClient.get(ByteSequence.from(key, StandardCharsets.UTF_8))
-                                .get()
-                                .getKvs();
-                        // 该节点已过期（需要重启节点才能重新注册）
-                        if (CollUtil.isEmpty(keyValues)) {
-                            continue;
-                        }
-                        // 节点未过期，重新注册（相当于续签）
-                        KeyValue keyValue = keyValues.get(0);
-                        String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
-                        ServiceMetaInfo serviceMetaInfo = JSONUtil.toBean(value, ServiceMetaInfo.class);
-                        register(serviceMetaInfo);
-                    } catch (Exception e) {
-                        throw new RuntimeException(key + "续签失败", e);
+        CronUtil.schedule("*/10 * * * * *", (Task) () -> {
+            // 遍历本节点所有的 key
+            for (String key : localRegisterNodeKeySet) {
+                try {
+                    List<KeyValue> keyValues = kvClient.get(ByteSequence.from(key, StandardCharsets.UTF_8))
+                            .get()
+                            .getKvs();
+                    // 该节点已过期（需要重启节点才能重新注册）
+                    if (CollUtil.isEmpty(keyValues)) {
+                        continue;
                     }
+                    // 节点未过期，重新注册（相当于续签）
+                    KeyValue keyValue = keyValues.get(0);
+                    String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
+                    ServiceMetaInfo serviceMetaInfo = JSONUtil.toBean(value, ServiceMetaInfo.class);
+                    register(serviceMetaInfo);
+                } catch (Exception e) {
+                    throw new RuntimeException(key + "续签失败", e);
                 }
             }
         });
@@ -188,19 +191,28 @@ public class EtcdRegistry implements Registry {
     }
 
     @Override
-    public void watch(String serviceNodeKey) {
+    public void watch(String serviceKey, String serviceNodeKey) {
         Watch watchClient = client.getWatchClient();
-        boolean add = watchingKeySet.add(serviceNodeKey);
+        boolean add = watchingKeySet.add(serviceKey);
         if (add) {
             watchClient.watch(ByteSequence.from(serviceNodeKey, StandardCharsets.UTF_8), response -> {
                 for (WatchEvent event : response.getEvents()) {
+                    KeyValue keyValue = event.getKeyValue();
+                    String watchServiceNodeKey = keyValue.getKey().toString(StandardCharsets.UTF_8);
                     switch (event.getEventType()) {
                         // key 删除时触发
                         case DELETE:
                             // 清理注册服务缓存
-                            registryServiceCache.clearCache();
+                            registryServiceCache.removeCache(serviceKey, watchServiceNodeKey);
+                            System.out.println("服务节点被删除，清理缓存");
                             break;
                         case PUT:
+                            // 可能是心跳续签
+                            if (registryServiceCache.containsCache(serviceKey, watchServiceNodeKey)) {
+                                break;
+                            }
+                            ServiceMetaInfo newServiceMetaInfo = JSONUtil.toBean(keyValue.getValue().toString(StandardCharsets.UTF_8), ServiceMetaInfo.class);
+                            registryServiceCache.writeCache(serviceKey, watchServiceNodeKey, newServiceMetaInfo);
                         default:
                             break;
                     }

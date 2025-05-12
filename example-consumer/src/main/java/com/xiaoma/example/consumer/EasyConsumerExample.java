@@ -26,6 +26,13 @@ public class EasyConsumerExample {
 
         // 调用
         User newUser = userService.getUser(user);
+        User newUser1 = userService.getUser(user);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        User newUser2 = userService.getUser(user);
         if(newUser != null) {
             System.out.println(newUser.getName());
         } else {
