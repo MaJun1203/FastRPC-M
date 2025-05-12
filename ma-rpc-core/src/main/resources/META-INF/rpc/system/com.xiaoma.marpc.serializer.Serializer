@@ -1,2 +1,3 @@
 hessian=com.xiaoma.marpc.serializer.HessianSerializer
-b=com.xiaoma.marpc.serializer.KryoSerializer
+kryo=com.xiaoma.marpc.serializer.KryoSerializer
+jdk=com.xiaoma.marpc.serializer.JdkSerializer

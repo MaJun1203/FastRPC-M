@@ -10,6 +10,7 @@ import com.xiaoma.marpc.registry.Registry;
 import com.xiaoma.marpc.registry.RegistryFactory;
 import com.xiaoma.marpc.server.HttpServer;
 import com.xiaoma.marpc.server.VertxHttpServer;
+import com.xiaoma.marpc.server.tcp.VertxTcpServer;
 
 /**
  * Class Name: ProviderExample
@@ -41,8 +42,8 @@ public class ProviderExample {
             throw new RuntimeException(e);
         }
 
-        // 启动 web 服务
-        HttpServer httpServer = new VertxHttpServer();
-        httpServer.doStart(RpcApplication.getRpcConfig().getServerPort());
+        // 启动 tcp 服务
+        VertxTcpServer vertxTcpServer = new VertxTcpServer();
+        vertxTcpServer.doStart(8081);
     }
 }
