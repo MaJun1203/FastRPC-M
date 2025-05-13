@@ -4,6 +4,8 @@ import cn.hutool.core.util.IdUtil;
 import com.xiaoma.marpc.RpcApplication;
 import com.xiaoma.marpc.config.RpcConfig;
 import com.xiaoma.marpc.constant.RpcConstant;
+import com.xiaoma.marpc.loadbalancer.LoadBalancer;
+import com.xiaoma.marpc.loadbalancer.LoadBalancerFactory;
 import com.xiaoma.marpc.model.RpcRequest;
 import com.xiaoma.marpc.model.RpcResponse;
 import com.xiaoma.marpc.model.ServiceMetaInfo;
@@ -22,7 +24,9 @@ import io.vertx.core.net.NetClient;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -59,7 +63,11 @@ public class ServiceProxy implements InvocationHandler {
             if (serviceMetaInfoList == null || serviceMetaInfoList.isEmpty()) {
                 throw new RuntimeException("暂无服务地址");
             }
-            ServiceMetaInfo selectedServiceMetaInfo = serviceMetaInfoList.get(0);
+            //负载均衡
+            LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+            Map<String, Object> requestParams = new HashMap<>();
+            requestParams.put("methodName",rpcRequest.getMethodName());
+            ServiceMetaInfo selectedServiceMetaInfo = loadBalancer.select(requestParams, serviceMetaInfoList);
 
 
             // 发送 TCP 请求
