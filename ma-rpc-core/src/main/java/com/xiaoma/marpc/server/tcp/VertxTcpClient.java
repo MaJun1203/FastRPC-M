@@ -8,6 +8,7 @@ import com.xiaoma.marpc.model.ServiceMetaInfo;
 import com.xiaoma.marpc.protocol.*;
 import com.xiaoma.marpc.serializer.ProtocolMessageSerializerEnum;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetSocket;

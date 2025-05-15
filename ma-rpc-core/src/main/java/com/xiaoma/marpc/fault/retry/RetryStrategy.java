@@ -1,4 +1,4 @@
-package com.xiaoma.marpc.retry;
+package com.xiaoma.marpc.fault.retry;
 
 import com.github.rholder.retry.RetryException;
 import com.xiaoma.marpc.model.RpcResponse;

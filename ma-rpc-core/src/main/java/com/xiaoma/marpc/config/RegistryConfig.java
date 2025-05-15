@@ -7,6 +7,7 @@ package com.xiaoma.marpc.config;
  * Author: xiaoma
  */
 
+import com.xiaoma.marpc.registry.RegistryKeys;
 import lombok.Data;
 
 /**
@@ -18,7 +19,7 @@ public class RegistryConfig {
     /**
      * 注册中心类别
      */
-    private String registry = "etcd";
+    private String registry = RegistryKeys.ETCD;
 
     /**
      * 注册中心地址

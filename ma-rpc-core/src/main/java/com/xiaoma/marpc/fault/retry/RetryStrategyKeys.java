@@ -1,4 +1,4 @@
-package com.xiaoma.marpc.retry;
+package com.xiaoma.marpc.fault.retry;
 
 /**
  * Class Name: RetryStrategyKeys

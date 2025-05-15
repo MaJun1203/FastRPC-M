@@ -1,4 +1,6 @@
 package com.xiaoma.marpc.retry;
+import com.xiaoma.marpc.fault.retry.FixedIntervalRetryStrategy;
+import com.xiaoma.marpc.fault.retry.RetryStrategy;
 import com.xiaoma.marpc.model.RpcResponse;
 import org.junit.Test;
 

@@ -1,5 +1,7 @@
 package com.xiaoma.marpc.config;
 
+import com.xiaoma.marpc.fault.retry.RetryStrategyKeys;
+import com.xiaoma.marpc.fault.tolerant.TolerantStrategyKeys;
 import com.xiaoma.marpc.loadbalancer.LoadBalancerKeys;
 import com.xiaoma.marpc.serializer.SerializerKeys;
 import lombok.Data;
@@ -32,7 +34,7 @@ public class RpcConfig {
     /**
      * 服务器端口号
      */
-    private int serverPort = 8080;
+    private int serverPort = 8081;
 
     /**
      * 模拟调用
@@ -55,5 +57,10 @@ public class RpcConfig {
     /**
      * 重试策略
      */
-    private String retryStrategy = "no";
+    private String retryStrategy = RetryStrategyKeys.NO;
+
+    /**
+     * 容错策略
+     */
+    private String tolerantStrategy = TolerantStrategyKeys.FAIL_FAST;
 }

@@ -1,2 +1,0 @@
-no=com.xiaoma.marpc.retry.NoRetryStrategy
-fixedInterval=com.xiaoma.marpc.retry.FixedIntervalRetryStrategy

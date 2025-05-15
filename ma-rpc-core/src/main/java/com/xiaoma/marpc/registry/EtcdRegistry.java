@@ -11,6 +11,7 @@ import io.etcd.jetcd.*;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.watch.WatchEvent;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * Author: xiaoma
  */
 
+@Slf4j
 public class EtcdRegistry implements Registry {
     private Client client;
     private KV kvClient;
@@ -178,6 +180,7 @@ public class EtcdRegistry implements Registry {
                     KeyValue keyValue = keyValues.get(0);
                     String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
                     ServiceMetaInfo serviceMetaInfo = JSONUtil.toBean(value, ServiceMetaInfo.class);
+                    log.info("续签服务节点: {}", serviceMetaInfo);
                     register(serviceMetaInfo);
                 } catch (Exception e) {
                     throw new RuntimeException(key + "续签失败", e);
@@ -199,6 +202,7 @@ public class EtcdRegistry implements Registry {
                 for (WatchEvent event : response.getEvents()) {
                     KeyValue keyValue = event.getKeyValue();
                     String watchServiceNodeKey = keyValue.getKey().toString(StandardCharsets.UTF_8);
+                    log.info("监听变化的服务节点: {}", watchServiceNodeKey);
                     switch (event.getEventType()) {
                         // key 删除时触发
                         case DELETE:
