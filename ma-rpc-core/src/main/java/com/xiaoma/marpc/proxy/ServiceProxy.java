@@ -1,35 +1,29 @@
 package com.xiaoma.marpc.proxy;
 
-import cn.hutool.core.util.IdUtil;
 import com.xiaoma.marpc.RpcApplication;
 import com.xiaoma.marpc.config.RpcConfig;
 import com.xiaoma.marpc.constant.RpcConstant;
+import com.xiaoma.marpc.fault.tolerant.TolerantStrategy;
+import com.xiaoma.marpc.fault.tolerant.TolerantStrategyFactory;
 import com.xiaoma.marpc.loadbalancer.LoadBalancer;
 import com.xiaoma.marpc.loadbalancer.LoadBalancerFactory;
 import com.xiaoma.marpc.model.RpcRequest;
 import com.xiaoma.marpc.model.RpcResponse;
 import com.xiaoma.marpc.model.ServiceMetaInfo;
-import com.xiaoma.marpc.protocol.*;
 import com.xiaoma.marpc.registry.Registry;
 import com.xiaoma.marpc.registry.RegistryFactory;
-import com.xiaoma.marpc.retry.RetryStrategy;
-import com.xiaoma.marpc.retry.RetryStrategyFactory;
-import com.xiaoma.marpc.serializer.ProtocolMessageSerializerEnum;
+import com.xiaoma.marpc.fault.retry.RetryStrategy;
+import com.xiaoma.marpc.fault.retry.RetryStrategyFactory;
 import com.xiaoma.marpc.serializer.Serializer;
 import com.xiaoma.marpc.serializer.SerializerFactory;
 import com.xiaoma.marpc.server.tcp.VertxTcpClient;
 import com.xiaoma.marpc.utils.ConfigUtils;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.net.NetClient;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Class Name: ServiceProxy
@@ -76,7 +70,7 @@ public class ServiceProxy implements InvocationHandler {
             //使用重试机制 发送 TCP 请求
             //RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo);
 
-            RpcResponse rpcResponse = null;
+            RpcResponse rpcResponse;
             try {
                 RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
                 rpcResponse = retryStrategy.doRetry(() ->
@@ -84,8 +78,8 @@ public class ServiceProxy implements InvocationHandler {
                 );
             } catch (Exception e) {
                 // 容错机制
-//                TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(rpcConfig.getTolerantStrategy());
-//                rpcResponse = tolerantStrategy.doTolerant(null, e);
+                TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(rpcConfig.getTolerantStrategy());
+                rpcResponse = tolerantStrategy.doTolerant(null, e);
             }
             return rpcResponse.getData();
         } catch (IOException e) {
