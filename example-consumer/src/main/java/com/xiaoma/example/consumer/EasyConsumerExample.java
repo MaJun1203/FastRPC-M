@@ -2,6 +2,7 @@ package com.xiaoma.example.consumer;
 
 import com.xiaoma.example.common.model.User;
 import com.xiaoma.example.common.service.UserService;
+import com.xiaoma.marpc.RpcApplication;
 import com.xiaoma.marpc.config.RpcConfig;
 import com.xiaoma.marpc.constant.RpcConstant;
 import com.xiaoma.marpc.proxy.ServiceProxy;
@@ -19,6 +20,7 @@ public class EasyConsumerExample {
     public static void main(String[] args) {
         RpcConfig rpc = ConfigUtils.loadConfig(RpcConfig.class, "rpc");
         System.out.println(rpc);
+        RpcApplication.init();
         // 启动服务消费者
         UserService userService = ServiceProxyFactory.getProxy(UserService.class);
         User user = new User();
