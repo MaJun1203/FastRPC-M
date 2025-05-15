@@ -1,0 +1,4 @@
+failBack=com.xiaoma.marpc.fault.tolerant.FailBackTolerantStrategy
+failFast=com.xiaoma.marpc.fault.tolerant.FailFastTolerantStrategy
+failOver=com.xiaoma.marpc.fault.tolerant.FailOverTolerantStrategy
+failSafe=com.xiaoma.marpc.fault.tolerant.FailSafeTolerantStrategy

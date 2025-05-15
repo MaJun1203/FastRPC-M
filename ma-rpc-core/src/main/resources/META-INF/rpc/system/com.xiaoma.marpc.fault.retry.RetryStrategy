@@ -1,0 +1,2 @@
+no=com.xiaoma.marpc.fault.retry.NoRetryStrategy
+fixedInterval=com.xiaoma.marpc.fault.retry.FixedIntervalRetryStrategy
